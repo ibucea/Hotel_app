@@ -8,9 +8,74 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllUsers = exports.createUser = void 0;
+exports.updateUser = exports.getUserById = exports.getAllUsers = exports.deleteUser = exports.createUser = exports.login = exports.register = exports.validateToken = void 0;
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const auth_1 = require("../middleware/auth");
 const users_1 = require("../models/users");
+const validateToken = (req, res) => {
+    console.log("Token validated, user authorized.");
+    return res.status(200).json({
+        message: "Token(s) validated",
+    });
+};
+exports.validateToken = validateToken;
+const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const salt = yield bcryptjs_1.default.genSalt(10);
+    var user = {
+        username: req.body.username,
+        email: req.body.email,
+        session: '',
+        password: yield bcryptjs_1.default.hash(req.body.password, salt),
+    };
+    yield bcryptjs_1.default.hash(user.password, 10, (hashError, hash) => {
+        if (hashError) {
+            return res.status(401).json({
+                message: hashError.message,
+                error: hashError,
+            });
+        }
+    });
+    const cteatedUser = yield users_1.Users.create(Object.assign({}, req.body));
+    return res
+        .status(200)
+        .json({ message: "User created successfully", data: cteatedUser });
+});
+exports.register = register;
+const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield users_1.Users.findOne({ where: { email: req.body.email } });
+    if (user) {
+        const password_valid = yield bcryptjs_1.default.compare(req.body.password, user.password);
+        if (password_valid) {
+            const token = (0, auth_1.signJWT)(user, (_error, token) => {
+                if (_error) {
+                    return res.status(401).json({
+                        message: "Unable to Sign JWT",
+                        error: _error,
+                    });
+                }
+                else if (token) {
+                    return res.status(200).json({
+                        message: "Auth Successful",
+                        token,
+                        user: user,
+                    });
+                }
+            });
+            res.status(200).json({ token: token });
+        }
+        else {
+            res.status(400).json({ error: "Password Incorrect" });
+        }
+    }
+    else {
+        res.status(404).json({ error: "User does not exist" });
+    }
+});
+exports.login = login;
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield users_1.Users.create(Object.assign({}, req.body));
     return res
@@ -18,6 +83,15 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         .json({ message: "User created successfully", data: user });
 });
 exports.createUser = createUser;
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    const deletedUser = yield users_1.Users.findByPk(userId);
+    yield users_1.Users.destroy({ where: { userId } });
+    return res
+        .status(200)
+        .json({ message: "User deleted successfully", data: deletedUser });
+});
+exports.deleteUser = deleteUser;
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const allUsers = yield users_1.Users.findAll();
     return res
@@ -25,3 +99,20 @@ const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         .json({ message: "Users fetched successfully", data: allUsers });
 });
 exports.getAllUsers = getAllUsers;
+const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    const user = yield users_1.Users.findByPk(userId);
+    return res
+        .status(200)
+        .json({ message: "User fetched successfully", data: user });
+});
+exports.getUserById = getUserById;
+const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    yield users_1.Users.update(Object.assign({}, req.body), { where: { userId } });
+    const updatedUsers = yield users_1.Users.findByPk(userId);
+    return res
+        .status(200)
+        .json({ message: "User updated successfully", data: updatedUsers });
+});
+exports.updateUser = updateUser;

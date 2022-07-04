@@ -1,5 +1,7 @@
 import express from "express";
+import bodyParser from 'body-parser';
 import connection from "./db/config";
+import config  from './server/config'
 import { json, urlencoded } from "body-parser";
 import userRoutes from "./routes/routesUser";
 import roomRoutes from './routes/routesRoom';
@@ -10,13 +12,9 @@ const app = express();
 
 app.use(json());
 
-app.use(urlencoded({ extended: true }));
+// app.use(urlencoded({ extended: true }));
 
-app.use("/user", userRoutes);
-app.use("/room", roomRoutes);
-app.use('/booking', bookingRoutes);
-
-
+/** Log the request */
 app.use(
   (
     err: Error,
@@ -28,6 +26,38 @@ app.use(
   }
 );
 
+/** Parse the body of the request */
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+
+/** Rules of our API */
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
+    if (req.method == 'OPTIONS') {
+        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
+        return res.status(200).json({});
+    }
+
+    next();
+});
+
+
+/** Routes go here */
+app.use("/user", userRoutes);
+app.use("/room", roomRoutes);
+app.use('/booking', bookingRoutes);
+
+/** Error handling */
+app.use((req, res, next) => {
+    const error = new Error('Not found');
+
+    res.status(404).json({
+        message: error.message
+    });
+});
 
 connection
   .sync()
@@ -38,6 +68,6 @@ connection
     console.log("Error", err);
   });
 
-app.listen(3000, () => {
-    console.log ('Server started on port 3000');
+app.listen(config.server.port, () => {
+    console.log (`Server started on port ${config.server.port}`);
 });
