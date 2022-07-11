@@ -9,6 +9,7 @@ const NAMESPACE = 'Auth';
     console.log(NAMESPACE, 'Validating token');
 
     let token = req.headers.authorization?.split(' ')[1];
+    console.log(token, 'token in exctract JWT')
 
     if (token) {
         jwt.verify(token, config.server.token.secret, (error, decoded) => {
@@ -39,7 +40,7 @@ export const signJWT = (user: Users, callback: (error: Error | null, token: stri
     try {
         jwt.sign(
             {
-                username: user.username
+                email: user.email
             },
             config.server.token.secret,
             {

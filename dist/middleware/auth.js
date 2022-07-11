@@ -11,6 +11,7 @@ const extractJWT = (req, res, next) => {
     var _a;
     console.log(NAMESPACE, 'Validating token');
     let token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
+    console.log(token, 'token in exctract JWT');
     if (token) {
         jsonwebtoken_1.default.verify(token, config_1.default.server.token.secret, (error, decoded) => {
             if (error) {
@@ -39,7 +40,7 @@ const signJWT = (user, callback) => {
     console.log(NAMESPACE, `Attempting to sign token for ${user.userId}`);
     try {
         jsonwebtoken_1.default.sign({
-            username: user.username
+            email: user.email
         }, config_1.default.server.token.secret, {
             issuer: config_1.default.server.token.issuer,
             algorithm: 'HS256',

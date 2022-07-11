@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const http_1 = __importDefault(require("http"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const config_1 = __importDefault(require("./db/config"));
 const config_2 = __importDefault(require("./server/config"));
@@ -32,9 +33,9 @@ app.use((req, res, next) => {
     next();
 });
 /** Routes go here */
-app.use("/user", routesUser_1.default);
-app.use("/room", routesRoom_1.default);
-app.use('/booking', routesBooking_1.default);
+app.use("/", routesUser_1.default);
+app.use("/", routesRoom_1.default);
+app.use('/', routesBooking_1.default);
 /** Error handling */
 app.use((req, res, next) => {
     const error = new Error('Not found');
@@ -50,6 +51,7 @@ config_1.default
     .catch((err) => {
     console.log("Error", err);
 });
-app.listen(config_2.default.server.port, () => {
+const httpServer = http_1.default.createServer(app);
+httpServer.listen(config_2.default.server.port, () => {
     console.log(`Server started on port ${config_2.default.server.port}`);
 });

@@ -1,4 +1,5 @@
 import express from "express";
+import http from 'http';
 import bodyParser from 'body-parser';
 import connection from "./db/config";
 import config  from './server/config'
@@ -46,9 +47,9 @@ app.use((req, res, next) => {
 
 
 /** Routes go here */
-app.use("/user", userRoutes);
-app.use("/room", roomRoutes);
-app.use('/booking', bookingRoutes);
+app.use("/", userRoutes);
+app.use("/", roomRoutes);
+app.use('/', bookingRoutes);
 
 /** Error handling */
 app.use((req, res, next) => {
@@ -68,6 +69,7 @@ connection
     console.log("Error", err);
   });
 
-app.listen(config.server.port, () => {
+const httpServer = http.createServer(app);
+httpServer.listen(config.server.port, () => {
     console.log (`Server started on port ${config.server.port}`);
 });

@@ -1,9 +1,11 @@
 import { RequestHandler } from "express";
 import bcryptjs from "bcryptjs";
-import connection from "../db/config";
 import { signJWT } from "../middleware/auth";
 
 import { Users } from "../models/users";
+// import { config } from "dotenv";
+import config  from '../server/config'
+
 
 export const validateToken: RequestHandler = (req, res) => {
   console.log("Token validated, user authorized.");
@@ -14,23 +16,18 @@ export const validateToken: RequestHandler = (req, res) => {
 };
 
 export const register: RequestHandler = async (req, res) => {
-  const salt = await bcryptjs.genSalt(10);
-  var user = {
-    username: req.body.username,
-    email: req.body.email,
-    session: '',
-    password: await bcryptjs.hash(req.body.password, salt),
-  };
+//   const salt = await bcryptjs.genSalt(10);
+//   var user = {
+//     username: req.body.username,
+//     email: req.body.email,
+//     session: config.server.token.secret,
+//     password: await bcryptjs.hash(req.body.password, 10),
+//   };
+let { username, password, email, session}  = req.body;
+session = config.server.token.secret;
 
-  await bcryptjs.hash(user.password, 10, (hashError, hash) => {
-    if (hashError) {
-      return res.status(401).json({
-        message: hashError.message,
-        error: hashError,
-      });
-    }
-  });
-  const cteatedUser = await Users.create({ ...req.body });
+  password = await bcryptjs.hashSync(password);
+  const cteatedUser = await Users.create({ username,password,email, session });
   return res
     .status(200)
     .json({ message: "User created successfully", data: cteatedUser });
@@ -39,12 +36,13 @@ export const register: RequestHandler = async (req, res) => {
 export const login: RequestHandler = async (req, res, next) => {
   const user = await Users.findOne({ where: { email: req.body.email } });
   if (user) {
+
     const password_valid = await bcryptjs.compare(
       req.body.password,
       user.password
     );
     if (password_valid) {
-      const token = signJWT(user, (_error, token) => {
+      const token = await signJWT(user, (_error, token) => {
         if (_error) {
           return res.status(401).json({
             message: "Unable to Sign JWT",
@@ -58,6 +56,7 @@ export const login: RequestHandler = async (req, res, next) => {
           });
         }
       });
+      console.log(token, 'token in login');
       res.status(200).json({ token: token });
     } else {
       res.status(400).json({ error: "Password Incorrect" });
