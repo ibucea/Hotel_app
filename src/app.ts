@@ -47,9 +47,9 @@ app.use((req, res, next) => {
 
 
 /** Routes go here */
-app.use("/", userRoutes);
-app.use("/", roomRoutes);
-app.use('/', bookingRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 /** Error handling */
 app.use((req, res, next) => {

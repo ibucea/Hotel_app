@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import bcryptjs from "bcryptjs";
-import { signJWT } from "../middleware/auth";
+import { generateToken, signJWT } from "../middleware/auth";
 
 import { Users } from "../models/users";
 // import { config } from "dotenv";
@@ -16,27 +16,27 @@ export const validateToken: RequestHandler = (req, res) => {
 };
 
 export const register: RequestHandler = async (req, res) => {
-//   const salt = await bcryptjs.genSalt(10);
-//   var user = {
-//     username: req.body.username,
-//     email: req.body.email,
-//     session: config.server.token.secret,
-//     password: await bcryptjs.hash(req.body.password, 10),
-//   };
-let { username, password, email, session}  = req.body;
-session = config.server.token.secret;
 
+  let { username, password, email, session}  = req.body;
+  session = config.server.token.secret;
   password = await bcryptjs.hashSync(password);
-  const cteatedUser = await Users.create({ username,password,email, session });
+
+  const createdUser = await Users.create({ username,password,email, session });
+  const id = (createdUser.userId).toString([2]);
+
   return res
     .status(200)
-    .json({ message: "User created successfully", data: cteatedUser });
+    .json({ message: "User created successfully",  
+    userId: createdUser.userId,
+    username: createdUser.username,
+    email: createdUser.email,
+    token: generateToken(id)});
 };
 
 export const login: RequestHandler = async (req, res, next) => {
   const user = await Users.findOne({ where: { email: req.body.email } });
+  
   if (user) {
-
     const password_valid = await bcryptjs.compare(
       req.body.password,
       user.password
@@ -49,6 +49,7 @@ export const login: RequestHandler = async (req, res, next) => {
             error: _error,
           });
         } else if (token) {
+          user.session = token;
           return res.status(200).json({
             message: "Auth Successful",
             token,
@@ -56,7 +57,6 @@ export const login: RequestHandler = async (req, res, next) => {
           });
         }
       });
-      console.log(token, 'token in login');
       res.status(200).json({ token: token });
     } else {
       res.status(400).json({ error: "Password Incorrect" });
@@ -105,3 +105,7 @@ export const updateUser: RequestHandler = async (req, res, next) => {
     .status(200)
     .json({ message: "User updated successfully", data: updatedUsers });
 };
+function radix(radix: any) {
+  throw new Error("Function not implemented.");
+}
+

@@ -9,8 +9,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateRoom = exports.getRoomById = exports.getAllRooms = exports.deleteRoom = exports.createRoom = void 0;
+exports.updateRoom = exports.getRoomById = exports.getAllRooms = exports.deleteRoom = exports.createRoom = exports.getAll = void 0;
 const rooms_1 = require("../models/rooms");
+// @Desc Get All Rooms
+// @Route /api/rooms
+// @Method GET
+const getAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const pageSize = 4;
+    const page = Number(req.query.pageNumber) || 1;
+    const keyword = req.query.keyword ? {
+        $or: [
+            { name: { $regex: req.query.keyword, $options: "i" } },
+            { description: { $regex: req.query.keyword, $options: "i" } },
+        ]
+    }
+        : {};
+    const numOfBeds = req.query.numOfBeds ? { numOfBeds: req.query.numOfBeds } : {};
+    const category = req.query.roomType ? { category: req.query.roomType } : {};
+    const count = yield rooms_1.Rooms.count();
+    const rooms = yield rooms_1.Rooms.findAll();
+    res.status(201).json({
+        rooms,
+        page,
+        pages: Math.ceil(count / pageSize),
+        count
+    });
+});
+exports.getAll = getAll;
 const createRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const room = yield rooms_1.Rooms.create(Object.assign({}, req.body));
     return res

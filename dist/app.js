@@ -33,9 +33,9 @@ app.use((req, res, next) => {
     next();
 });
 /** Routes go here */
-app.use("/", routesUser_1.default);
-app.use("/", routesRoom_1.default);
-app.use('/', routesBooking_1.default);
+app.use("/api/users", routesUser_1.default);
+app.use("/api/rooms", routesRoom_1.default);
+app.use('/api/bookings', routesBooking_1.default);
 /** Error handling */
 app.use((req, res, next) => {
     const error = new Error('Not found');

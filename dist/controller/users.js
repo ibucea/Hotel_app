@@ -26,20 +26,18 @@ const validateToken = (req, res) => {
 };
 exports.validateToken = validateToken;
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //   const salt = await bcryptjs.genSalt(10);
-    //   var user = {
-    //     username: req.body.username,
-    //     email: req.body.email,
-    //     session: config.server.token.secret,
-    //     password: await bcryptjs.hash(req.body.password, 10),
-    //   };
     let { username, password, email, session } = req.body;
     session = config_1.default.server.token.secret;
     password = yield bcryptjs_1.default.hashSync(password);
-    const cteatedUser = yield users_1.Users.create({ username, password, email, session });
+    const createdUser = yield users_1.Users.create({ username, password, email, session });
+    const id = (createdUser.userId).toString([2]);
     return res
         .status(200)
-        .json({ message: "User created successfully", data: cteatedUser });
+        .json({ message: "User created successfully",
+        userId: createdUser.userId,
+        username: createdUser.username,
+        email: createdUser.email,
+        token: (0, auth_1.generateToken)(id) });
 });
 exports.register = register;
 const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -55,6 +53,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
                     });
                 }
                 else if (token) {
+                    user.session = token;
                     return res.status(200).json({
                         message: "Auth Successful",
                         token,
@@ -62,7 +61,6 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
                     });
                 }
             });
-            console.log(token, 'token in login');
             res.status(200).json({ token: token });
         }
         else {
@@ -114,3 +112,6 @@ const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         .json({ message: "User updated successfully", data: updatedUsers });
 });
 exports.updateUser = updateUser;
+function radix(radix) {
+    throw new Error("Function not implemented.");
+}

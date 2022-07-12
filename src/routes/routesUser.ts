@@ -10,9 +10,9 @@ import { extractJWT } from "../middleware/auth";
 
 const routerUser = Router();
 
-routerUser.get("/validate", extractJWT, validateToken);
-routerUser.post("/register", register);
-routerUser.get("/login", login);
-routerUser.get("/getAllUsers", getAllUsers);
+routerUser.route("/validate").get(extractJWT, validateToken);
+routerUser.route("/register").post(register);
+routerUser.route("/login").post(login);
+routerUser.route("/getAllUsers").get(getAllUsers);
 
 export default routerUser;

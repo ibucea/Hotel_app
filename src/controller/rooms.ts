@@ -2,6 +2,38 @@ import { RequestHandler } from "express";
 
 import { Rooms } from "../models/rooms";
 
+// @Desc Get All Rooms
+// @Route /api/rooms
+// @Method GET
+export const getAll :RequestHandler = async(req, res) => {
+
+  const pageSize = 4;
+  const page = Number(req.query.pageNumber) || 1;
+
+  const keyword = req.query.keyword ? {
+      $or: [
+          {name: { $regex: req.query.keyword, $options: "i" }},
+          {description: { $regex: req.query.keyword, $options: "i" }},
+      ]
+  }
+  : {};
+
+  const numOfBeds = req.query.numOfBeds ? {numOfBeds: req.query.numOfBeds} : {};
+
+  const category = req.query.roomType ? {category: req.query.roomType} : {};
+
+  const count = await Rooms.count();
+
+  const rooms = await Rooms.findAll();
+  res.status(201).json({
+      rooms,
+      page,
+      pages: Math.ceil(count / pageSize),
+      count
+  });
+};
+
+
 export const createRoom: RequestHandler = async (req, res) => {
   const room = await Rooms.create({ ...req.body });
   return res

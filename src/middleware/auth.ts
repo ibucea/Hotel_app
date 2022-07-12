@@ -5,6 +5,12 @@ import { Users } from '../models/users';
 
 const NAMESPACE = 'Auth';
 
+export const generateToken = (id: string) => {
+    const token = jwt.sign({ id }, process.env.JWT_SECRET as string);
+    return token;
+};
+
+
  export const extractJWT : RequestHandler = (req, res, next) => {
     console.log(NAMESPACE, 'Validating token');
 
