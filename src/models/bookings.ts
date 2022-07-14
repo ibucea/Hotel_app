@@ -1,6 +1,5 @@
 import { Table, Model, Column, DataType } from "sequelize-typescript";
-import { DateDataType, DecimalDataType, IntegerDataType } from "sequelize/types";
-
+import { IntegerDataType } from "sequelize/types";
 @Table({
   timestamps: false,
   tableName: "Bookings",
@@ -32,20 +31,32 @@ export class Bookings extends Model {
     userId!: IntegerDataType;
 
   @Column({
-    type: DataType.DECIMAL,
+    type: DataType.DATE,
     allowNull: false,
   })
-  price!: DecimalDataType;
+  checkInDate!: Date;
 
   @Column({
     type: DataType.DATE,
     allowNull: false,
   })
-  dateArrived!: DateDataType;
+  checkOutDate!: Date;
+
+  @Column({
+    type: DataType.NUMBER,
+    allowNull: false,
+  })
+  daysOfStay!: Number;
 
   @Column({
     type: DataType.DATE,
     allowNull: false,
   })
-  dateDepart!: DateDataType;
+  createdAt!: Date;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+  })
+  updatedAt!: Date;
 }

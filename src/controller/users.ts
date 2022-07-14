@@ -57,7 +57,7 @@ export const login: RequestHandler = async (req, res, next) => {
           });
         }
       });
-      res.status(200).json({ token: token });
+      res.status(200).json({ token: token, user });
     } else {
       res.status(400).json({ error: "Password Incorrect" });
     }
@@ -105,7 +105,3 @@ export const updateUser: RequestHandler = async (req, res, next) => {
     .status(200)
     .json({ message: "User updated successfully", data: updatedUsers });
 };
-function radix(radix: any) {
-  throw new Error("Function not implemented.");
-}
-

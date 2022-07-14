@@ -61,7 +61,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
                     });
                 }
             });
-            res.status(200).json({ token: token });
+            res.status(200).json({ token: token, user });
         }
         else {
             res.status(400).json({ error: "Password Incorrect" });
@@ -112,6 +112,3 @@ const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         .json({ message: "User updated successfully", data: updatedUsers });
 });
 exports.updateUser = updateUser;
-function radix(radix) {
-    throw new Error("Function not implemented.");
-}

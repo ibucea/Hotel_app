@@ -7,11 +7,11 @@ import { IntegerDataType } from "sequelize/types";
 })
 export class Rooms extends Model {
   @Column({
-        type: DataType.INTEGER,
+        type: DataType.STRING,
         primaryKey: true,
         autoIncrement: true,
     })
-    roomId!: IntegerDataType;
+    roomId!: String;
 
   @Column({
     type: DataType.STRING,

@@ -59,12 +59,15 @@ const getAllRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         .json({ message: "Rooms fetched successfully", data: allRooms });
 });
 exports.getAllRooms = getAllRooms;
+// @Desc Get Room By Id
+// @Route /api/rooms/:id
+// @Method GET
 const getRoomById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { roomId } = req.params;
-    const rooms = yield rooms_1.Rooms.findByPk(roomId);
+    const roomId = req.params;
+    const room = yield rooms_1.Rooms.findByPk(roomId.id);
     return res
         .status(200)
-        .json({ message: "Room fetched successfully", data: rooms });
+        .json(room);
 });
 exports.getRoomById = getRoomById;
 const updateRoom = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -73,6 +76,6 @@ const updateRoom = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     const updatedRooms = yield rooms_1.Rooms.findByPk(roomId);
     return res
         .status(200)
-        .json({ message: "Room updated successfully", data: updatedRooms });
+        .json({ updatedRooms });
 });
 exports.updateRoom = updateRoom;

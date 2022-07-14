@@ -9,15 +9,91 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateBooking = exports.getBookingById = exports.getAllBookings = exports.deleteBooking = exports.createBooking = void 0;
+exports.updateBooking = exports.getBookingById = exports.getAllBookings = exports.deleteBooking = exports.getBookedDates = exports.checkRoomIsAvailble = exports.myBookings = exports.createBooking = void 0;
 const bookings_1 = require("../models/bookings");
+const moment_range_1 = require("moment-range");
+// import moment from "moment";
+const Moment = require('moment');
+// @Desc new booking
+// @Route /api/bookings
+// @Method POST
 const createBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const booking = yield bookings_1.Bookings.create(Object.assign({}, req.body));
     return res
         .status(200)
-        .json({ message: "Booking created successfully", data: booking });
+        .json(booking);
 });
 exports.createBooking = createBooking;
+// @Desc Get all bookings current user
+// @Route /api/bookings/me
+// @Method GET
+const myBookings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.body;
+    console.log(userId, 'userID form my bookings');
+    const bookings = yield bookings_1.Bookings.findAll({ where: { userId } });
+    if (!bookings) {
+        res.status(401);
+        throw new Error("Bookings not found");
+    }
+    res.status(201).json(bookings);
+});
+exports.myBookings = myBookings;
+// @Desc Check room is available for booking
+// @Route /api/bookings/check
+// @Method POST
+const checkRoomIsAvailble = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { roomId, checkInDate, checkOutDate } = req.body;
+    const checkInDateR = new Date(checkInDate).toISOString().split('T')[0];
+    const checkOutDateR = new Date(checkOutDate).toISOString().split('T')[0];
+    checkInDate = checkInDateR;
+    checkOutDate = checkOutDateR;
+    console.log(roomId, 'roomidddd');
+    const booking = yield bookings_1.Bookings.findAll({
+        where: {
+            roomId: roomId,
+            checkInDate,
+            checkOutDate
+        }
+    });
+    // const room = await Rooms.findByPk(roomId)
+    console.log(booking, 'bookingggggggg');
+    let roomAvailable;
+    if (booking) {
+        roomAvailable = true;
+    }
+    else {
+        roomAvailable = false;
+        res.status(500).json(roomAvailable);
+        return;
+    }
+    res.status(201).json(roomAvailable);
+});
+exports.checkRoomIsAvailble = checkRoomIsAvailble;
+// @Desc Get booked dates
+// Route /api/bookings/dates/:roomId
+// @Route GET
+const getBookedDates = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { roomId } = req.params;
+    const bookings = yield bookings_1.Bookings.findAll({ where: { roomId } });
+    let bookedDates = [];
+    const moment = (0, moment_range_1.extendMoment)(Moment);
+    const timeDiffernece = moment().utcOffset() / 60;
+    if (!bookings) {
+        res.status(401);
+        throw new Error("Bookings not found");
+    }
+    else {
+        bookings.forEach((booking) => {
+            const checkInDate = moment(booking.checkInDate).add(timeDiffernece, 'hours');
+            const checkOutDate = moment(booking.checkOutDate).add(timeDiffernece, 'hours');
+            const range = moment.range(moment(checkInDate), moment(checkOutDate));
+            const dates = Array.from(range.by('day'));
+            bookedDates = bookedDates.concat(dates);
+        });
+        res.status(200).json(bookedDates);
+    }
+});
+exports.getBookedDates = getBookedDates;
 const deleteBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { bookingId } = req.params;
     const deletedBooking = yield bookings_1.Bookings.findByPk(bookingId);

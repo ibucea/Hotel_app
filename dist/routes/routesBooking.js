@@ -2,7 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const bookings_1 = require("../controller/bookings");
-const routerRoom = (0, express_1.Router)();
-routerRoom.post('/booking', bookings_1.createBooking);
-routerRoom.get("/bookings", bookings_1.getAllBookings);
-exports.default = routerRoom;
+const routerBooking = (0, express_1.Router)();
+routerBooking.route("/me").get(bookings_1.myBookings);
+routerBooking.route("/check").post(bookings_1.checkRoomIsAvailble);
+routerBooking.route("/dates/:roomId").get(bookings_1.getBookedDates);
+routerBooking.route('/booking').post(bookings_1.createBooking);
+exports.default = routerBooking;

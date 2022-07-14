@@ -37,22 +37,34 @@ __decorate([
 ], Bookings.prototype, "userId", void 0);
 __decorate([
     (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DECIMAL,
+        type: sequelize_typescript_1.DataType.DATE,
         allowNull: false,
     })
-], Bookings.prototype, "price", void 0);
+], Bookings.prototype, "checkInDate", void 0);
 __decorate([
     (0, sequelize_typescript_1.Column)({
         type: sequelize_typescript_1.DataType.DATE,
         allowNull: false,
     })
-], Bookings.prototype, "dateArrived", void 0);
+], Bookings.prototype, "checkOutDate", void 0);
+__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.NUMBER,
+        allowNull: false,
+    })
+], Bookings.prototype, "daysOfStay", void 0);
 __decorate([
     (0, sequelize_typescript_1.Column)({
         type: sequelize_typescript_1.DataType.DATE,
         allowNull: false,
     })
-], Bookings.prototype, "dateDepart", void 0);
+], Bookings.prototype, "createdAt", void 0);
+__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        allowNull: false,
+    })
+], Bookings.prototype, "updatedAt", void 0);
 Bookings = __decorate([
     (0, sequelize_typescript_1.Table)({
         timestamps: false,

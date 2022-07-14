@@ -1,8 +1,13 @@
 import { Router } from "express";
-import { createBooking, getAllBookings } from "../controller/bookings";
+import { createBooking, getAllBookings, myBookings, checkRoomIsAvailble, getBookedDates } from "../controller/bookings";
+import { extractJWT } from "../middleware/auth";
 
-const routerRoom = Router();
-routerRoom.post('/booking', createBooking)
-routerRoom.get("/bookings", getAllBookings);
+const routerBooking = Router();
 
-export default routerRoom;
+routerBooking.route("/me").get(myBookings);
+routerBooking.route("/check").post(checkRoomIsAvailble);
+routerBooking.route("/dates/:roomId").get(getBookedDates);
+routerBooking.route('/booking').post(createBooking)
+
+
+export default routerBooking;

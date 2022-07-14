@@ -1,4 +1,6 @@
 import { RequestHandler } from "express";
+import { IsNumeric } from "sequelize-typescript";
+import { IntegerDataType, NUMBER } from "sequelize/types";
 
 import { Rooms } from "../models/rooms";
 
@@ -57,13 +59,19 @@ export const getAllRooms: RequestHandler = async (req, res) => {
     .json({ message: "Rooms fetched successfully", data: allRooms });
 };
 
+
+// @Desc Get Room By Id
+// @Route /api/rooms/:id
+// @Method GET
+
 export const getRoomById: RequestHandler = async (req, res) => {
-  const { roomId } = req.params;
-  const rooms: Rooms | null = await Rooms.findByPk(roomId);
+  const roomId = req.params;
+  const room = await Rooms.findByPk(roomId.id);
   return res
     .status(200)
-    .json({ message: "Room fetched successfully", data: rooms });
+    .json(room);
 };
+
 
 export const updateRoom: RequestHandler = async (req, res, next) => {
   const { roomId } = req.params;
@@ -71,5 +79,5 @@ export const updateRoom: RequestHandler = async (req, res, next) => {
   const updatedRooms: Rooms | null = await Rooms.findByPk(roomId);
   return res
     .status(200)
-    .json({ message: "Room updated successfully", data: updatedRooms });
+    .json({ updatedRooms });
 };

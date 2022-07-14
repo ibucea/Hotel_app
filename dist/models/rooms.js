@@ -12,7 +12,7 @@ let Rooms = class Rooms extends sequelize_typescript_1.Model {
 };
 __decorate([
     (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.INTEGER,
+        type: sequelize_typescript_1.DataType.STRING,
         primaryKey: true,
         autoIncrement: true,
     })
