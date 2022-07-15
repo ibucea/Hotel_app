@@ -7,5 +7,5 @@ const routerUser = (0, express_1.Router)();
 routerUser.route("/validate").get(auth_1.extractJWT, users_1.validateToken);
 routerUser.route("/register").post(users_1.register);
 routerUser.route("/login").post(users_1.login);
-routerUser.route("/getAllUsers").get(users_1.getAllUsers);
+routerUser.route("/getAllUsers").get(auth_1.protect, users_1.getAllUsers);
 exports.default = routerUser;

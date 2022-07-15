@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateBooking = exports.getBookingById = exports.getAllBookings = exports.deleteBooking = exports.getBookedDates = exports.checkRoomIsAvailble = exports.myBookings = exports.createBooking = void 0;
 const bookings_1 = require("../models/bookings");
+const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const moment_range_1 = require("moment-range");
 // import moment from "moment";
 const Moment = require('moment');
@@ -27,17 +31,18 @@ exports.createBooking = createBooking;
 // @Desc Get all bookings current user
 // @Route /api/bookings/me
 // @Method GET
-const myBookings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.body;
-    console.log(userId, 'userID form my bookings');
-    const bookings = yield bookings_1.Bookings.findAll({ where: { userId } });
+exports.myBookings = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const bookings = yield bookings_1.Bookings.findAll({
+        where: {
+            userId: req.userId
+        }
+    });
     if (!bookings) {
         res.status(401);
         throw new Error("Bookings not found");
     }
     res.status(201).json(bookings);
-});
-exports.myBookings = myBookings;
+}));
 // @Desc Check room is available for booking
 // @Route /api/bookings/check
 // @Method POST
@@ -47,7 +52,6 @@ const checkRoomIsAvailble = (req, res) => __awaiter(void 0, void 0, void 0, func
     const checkOutDateR = new Date(checkOutDate).toISOString().split('T')[0];
     checkInDate = checkInDateR;
     checkOutDate = checkOutDateR;
-    console.log(roomId, 'roomidddd');
     const booking = yield bookings_1.Bookings.findAll({
         where: {
             roomId: roomId,
@@ -55,8 +59,6 @@ const checkRoomIsAvailble = (req, res) => __awaiter(void 0, void 0, void 0, func
             checkOutDate
         }
     });
-    // const room = await Rooms.findByPk(roomId)
-    console.log(booking, 'bookingggggggg');
     let roomAvailable;
     if (booking) {
         roomAvailable = true;

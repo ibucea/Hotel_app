@@ -1,7 +1,4 @@
 import { RequestHandler } from "express";
-import { IsNumeric } from "sequelize-typescript";
-import { IntegerDataType, NUMBER } from "sequelize/types";
-
 import { Rooms } from "../models/rooms";
 
 // @Desc Get All Rooms

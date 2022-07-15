@@ -1,6 +1,11 @@
 import { Table, Model, Column, DataType } from "sequelize-typescript";
 import { IntegerDataType } from "sequelize/types";
+import { Request } from 'express';
 
+
+export interface IUserRequest extends Request {
+  userId?: any
+}
 @Table({
   timestamps: false,
   tableName: "Users",
@@ -34,7 +39,6 @@ export class Users extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
   })
-  session!: string;
+  session: string | undefined;
 }

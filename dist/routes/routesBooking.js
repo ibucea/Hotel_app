@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const bookings_1 = require("../controller/bookings");
+const auth_1 = require("../middleware/auth");
 const routerBooking = (0, express_1.Router)();
-routerBooking.route("/me").get(bookings_1.myBookings);
+routerBooking.route("/me").get(auth_1.protect, bookings_1.myBookings);
 routerBooking.route("/check").post(bookings_1.checkRoomIsAvailble);
 routerBooking.route("/dates/:roomId").get(bookings_1.getBookedDates);
-routerBooking.route('/booking').post(bookings_1.createBooking);
+routerBooking.route('/').post(bookings_1.createBooking);
 exports.default = routerBooking;

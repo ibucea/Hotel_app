@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import config from '../server/config';
-import { RequestHandler } from 'express';
-import { Users } from '../models/users';
+import { NextFunction, Response } from 'express';
+import { IUserRequest } from '../models/users';
+import asyncHandler from 'express-async-handler';
 
 const NAMESPACE = 'Auth';
 
@@ -10,59 +10,30 @@ export const generateToken = (id: string) => {
     return token;
 };
 
+export const protect = asyncHandler (async(req: IUserRequest, res: Response, next: NextFunction) =>  {
 
- export const extractJWT : RequestHandler = (req, res, next) => {
-    console.log(NAMESPACE, 'Validating token');
+    let token;
 
-    let token = req.headers.authorization?.split(' ')[1];
-    console.log(token, 'token in exctract JWT')
+    if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
 
-    if (token) {
-        jwt.verify(token, config.server.token.secret, (error, decoded) => {
-            if (error) {
-                return res.status(404).json({
-                    message: error,
-                    error
-                });
-            } else {
-                res.locals.jwt = decoded;
-                next();
-            }
-        });
-    } else {
-        return res.status(401).json({
-            message: 'Unauthorized'
-        });
+        try {            
+            token = req.headers.authorization.split(" ")[1];
+            const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+
+            req.userId = parseInt(decoded.id, 2 );
+
+            next();
+        } catch (error: any) {
+            console.log(error.message);
+            res.status(401);
+            throw new Error("no token, no auth");
+        }
+
     }
-};
 
-export const signJWT = (user: Users, callback: (error: Error | null, token: string | null) => void): void => {
-    var timeSinceEpoch = new Date().getTime();
-    var expirationTime = timeSinceEpoch + Number(config.server.token.expireTime) * 100000;
-    var expirationTimeInSeconds = Math.floor(expirationTime / 1000);
-
-    console.log(NAMESPACE, `Attempting to sign token for ${user.userId}`);
-
-    try {
-        jwt.sign(
-            {
-                email: user.email
-            },
-            config.server.token.secret,
-            {
-                issuer: config.server.token.issuer,
-                algorithm: 'HS256',
-                expiresIn: expirationTimeInSeconds
-            },
-            (error, token) => {
-                if (error) {
-                    callback(error, null);
-                } else if (token) {
-                    callback(null, token);
-                }
-            }
-        );
-    } catch (e) {
-        console.log(e)
+    if(!token) {
+        res.status(401);
+        throw new Error("no token, no auth");
     }
-};
+
+});

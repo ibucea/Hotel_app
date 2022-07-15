@@ -1,13 +1,12 @@
 import { Router } from "express";
-import { createBooking, getAllBookings, myBookings, checkRoomIsAvailble, getBookedDates } from "../controller/bookings";
-import { extractJWT } from "../middleware/auth";
+import { createBooking, myBookings, checkRoomIsAvailble, getBookedDates } from "../controller/bookings";
+import { protect } from "../middleware/auth";
 
 const routerBooking = Router();
 
-routerBooking.route("/me").get(myBookings);
+routerBooking.route("/me").get(protect, myBookings);
 routerBooking.route("/check").post(checkRoomIsAvailble);
 routerBooking.route("/dates/:roomId").get(getBookedDates);
-routerBooking.route('/booking').post(createBooking)
-
+routerBooking.route('/').post(createBooking)
 
 export default routerBooking;

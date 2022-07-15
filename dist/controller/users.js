@@ -16,8 +16,6 @@ exports.updateUser = exports.getUserById = exports.getAllUsers = exports.deleteU
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const auth_1 = require("../middleware/auth");
 const users_1 = require("../models/users");
-// import { config } from "dotenv";
-const config_1 = __importDefault(require("../server/config"));
 const validateToken = (req, res) => {
     console.log("Token validated, user authorized.");
     return res.status(200).json({
@@ -26,18 +24,22 @@ const validateToken = (req, res) => {
 };
 exports.validateToken = validateToken;
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let { username, password, email, session } = req.body;
-    session = config_1.default.server.token.secret;
+    let { username, password, email } = req.body;
+    // session = config.server.token.secret;
     password = yield bcryptjs_1.default.hashSync(password);
-    const createdUser = yield users_1.Users.create({ username, password, email, session });
+    const createdUser = yield users_1.Users.create({ username, password, email });
     const id = (createdUser.userId).toString([2]);
     return res
         .status(200)
-        .json({ message: "User created successfully",
-        userId: createdUser.userId,
-        username: createdUser.username,
-        email: createdUser.email,
-        token: (0, auth_1.generateToken)(id) });
+        .json({
+        user: {
+            userId: createdUser.userId,
+            username: createdUser.username,
+            email: createdUser.email,
+            session: (0, auth_1.generateToken)(id),
+            token: (0, auth_1.generateToken)(id)
+        }
+    });
 });
 exports.register = register;
 const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -45,23 +47,14 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
     if (user) {
         const password_valid = yield bcryptjs_1.default.compare(req.body.password, user.password);
         if (password_valid) {
-            const token = yield (0, auth_1.signJWT)(user, (_error, token) => {
-                if (_error) {
-                    return res.status(401).json({
-                        message: "Unable to Sign JWT",
-                        error: _error,
-                    });
-                }
-                else if (token) {
-                    user.session = token;
-                    return res.status(200).json({
-                        message: "Auth Successful",
-                        token,
-                        user: user,
-                    });
-                }
-            });
-            res.status(200).json({ token: token, user });
+            const id = (user.userId).toString([2]);
+            res.status(200).json({ user: {
+                    userId: user.userId,
+                    username: user.username,
+                    email: user.email,
+                    session: (0, auth_1.generateToken)(id),
+                    token: (0, auth_1.generateToken)(id)
+                } });
         }
         else {
             res.status(400).json({ error: "Password Incorrect" });

@@ -1,7 +1,9 @@
 import { RequestHandler } from "express";
 import { Bookings } from "../models/bookings";
+import { Response } from 'express';
+import asyncHandler from 'express-async-handler';
 import { extendMoment } from 'moment-range';
-import { Rooms } from "../models/rooms";
+import { IUserRequest, Users } from "../models/users";
 // import moment from "moment";
 const Moment = require('moment');
 
@@ -20,10 +22,12 @@ export const createBooking: RequestHandler = async (req, res) => {
 // @Desc Get all bookings current user
 // @Route /api/bookings/me
 // @Method GET
-export const myBookings: RequestHandler = async (req, res) => {
-  const { userId } = req.body;
- 
-  const bookings = await Bookings.findAll({ where: { userId } });
+export const myBookings = asyncHandler(async (req: IUserRequest, res: Response) => {
+  const bookings = await Bookings.findAll({
+    where: {
+      userId: req.userId
+    }
+  })
 
   if (!bookings) {
     res.status(401);
@@ -32,14 +36,13 @@ export const myBookings: RequestHandler = async (req, res) => {
 
   res.status(201).json(bookings);
 
-};
+});
 
 
 // @Desc Check room is available for booking
 // @Route /api/bookings/check
 // @Method POST
 export const checkRoomIsAvailble: RequestHandler = async (req, res) => {
-
   let { roomId, checkInDate, checkOutDate } = req.body;
 
   const checkInDateR = new Date(checkInDate).toISOString().split('T')[0]
@@ -50,13 +53,12 @@ export const checkRoomIsAvailble: RequestHandler = async (req, res) => {
 
   const booking = await Bookings.findAll({
     where: {
-      roomId : roomId,
+      roomId: roomId,
       checkInDate,
       checkOutDate
-      
+
     }
   });
-  // const room = await Rooms.findByPk(roomId)
 
   let roomAvailable;
 
@@ -78,13 +80,12 @@ export const checkRoomIsAvailble: RequestHandler = async (req, res) => {
 // @Route GET
 export const getBookedDates: RequestHandler = async (req, res) => {
   const { roomId } = req.params
- 
+
   const bookings = await Bookings.findAll({ where: { roomId } });
 
   let bookedDates: {}[] = [];
   const moment = extendMoment(Moment);
   const timeDiffernece = moment().utcOffset() / 60;
-
 
   if (!bookings) {
     res.status(401);
@@ -138,3 +139,4 @@ export const updateBooking: RequestHandler = async (req, res, next) => {
     .status(200)
     .json({ message: "Booking updated successfully", data: updatedBookings });
 };
+

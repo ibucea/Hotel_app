@@ -1,10 +1,7 @@
 import { RequestHandler } from "express";
 import bcryptjs from "bcryptjs";
-import { generateToken, signJWT } from "../middleware/auth";
-
+import { generateToken } from "../middleware/auth";
 import { Users } from "../models/users";
-// import { config } from "dotenv";
-import config  from '../server/config'
 
 
 export const validateToken: RequestHandler = (req, res) => {
@@ -16,48 +13,43 @@ export const validateToken: RequestHandler = (req, res) => {
 };
 
 export const register: RequestHandler = async (req, res) => {
+  let { username, password, email } = req.body;
 
-  let { username, password, email, session}  = req.body;
-  session = config.server.token.secret;
   password = await bcryptjs.hashSync(password);
 
-  const createdUser = await Users.create({ username,password,email, session });
+  const createdUser = await Users.create({ username, password, email });
   const id = (createdUser.userId).toString([2]);
 
   return res
     .status(200)
-    .json({ message: "User created successfully",  
-    userId: createdUser.userId,
-    username: createdUser.username,
-    email: createdUser.email,
-    token: generateToken(id)});
+    .json({
+      user: {
+        userId: createdUser.userId,
+        username: createdUser.username,
+        email: createdUser.email,
+        session: generateToken(id),
+        token: generateToken(id)
+      }
+    });
 };
 
 export const login: RequestHandler = async (req, res, next) => {
   const user = await Users.findOne({ where: { email: req.body.email } });
-  
   if (user) {
     const password_valid = await bcryptjs.compare(
       req.body.password,
       user.password
     );
     if (password_valid) {
-      const token = await signJWT(user, (_error, token) => {
-        if (_error) {
-          return res.status(401).json({
-            message: "Unable to Sign JWT",
-            error: _error,
-          });
-        } else if (token) {
-          user.session = token;
-          return res.status(200).json({
-            message: "Auth Successful",
-            token,
-            user: user,
-          });
-        }
-      });
-      res.status(200).json({ token: token, user });
+    const id = (user.userId).toString([2]);
+
+      res.status(200).json({ user: {
+        userId: user.userId,
+        username: user.username,
+        email: user.email,
+        session: generateToken(id),
+        token: generateToken(id)
+      } });
     } else {
       res.status(400).json({ error: "Password Incorrect" });
     }

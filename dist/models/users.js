@@ -38,7 +38,6 @@ __decorate([
 __decorate([
     (0, sequelize_typescript_1.Column)({
         type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
     })
 ], Users.prototype, "session", void 0);
 Users = __decorate([
